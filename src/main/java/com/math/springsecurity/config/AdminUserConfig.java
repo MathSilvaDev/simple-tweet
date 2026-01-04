@@ -4,16 +4,19 @@ import com.math.springsecurity.role.entity.Role;
 import com.math.springsecurity.role.repository.RoleRepository;
 import com.math.springsecurity.user.entity.User;
 import com.math.springsecurity.user.repository.UserRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.CommandLineRunner;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Optional;
 import java.util.Set;
 
-@Configuration
+@Component
 public class AdminUserConfig implements CommandLineRunner {
+
+    private static final Logger log = LoggerFactory.getLogger(AdminUserConfig.class);
 
     private RoleRepository roleRepository;
     private UserRepository userRepository;
@@ -30,23 +33,21 @@ public class AdminUserConfig implements CommandLineRunner {
     @Override
     @Transactional
     public void run(String... args) throws Exception {
-        Role roleAdmin = roleRepository.findByName(Role.Values.ADMIN.name())
-                .orElseThrow(() -> new RuntimeException("ERRO NA CLASSE AdminUserConfig"));
+        Role adminRole  = roleRepository.findByName(Role.Values.ADMIN.name())
+                .orElseThrow(() -> new RuntimeException("Admin Role NotFound"));
 
-        Optional<User> userAdmin = userRepository.findByUsername("ADMIN");
+        if (userRepository.existsByUsername("ADMIN")) {
+            log.info("User ADMIN Already exists");
+            return;
+        }
 
-        userAdmin.ifPresentOrElse(
-                (user) -> {
-                    System.out.print("Admin ja existe");
-                },
-                () -> {
-                    User user = new User(
-                            "ADMIN",
-                            passwordEncoder.encode("1352"),
-                            Set.of(roleAdmin)
-                    );
-                    userRepository.save(user);
-                }
+        User admin = new User(
+                "ADMIN",
+                passwordEncoder.encode("1352"),
+                Set.of(adminRole)
         );
+
+        userRepository.save(admin);
+        log.info("created ADMIN");
     }
 }
