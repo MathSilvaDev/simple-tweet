@@ -40,10 +40,11 @@ public class AdminUserConfig implements CommandLineRunner {
                     System.out.print("Admin ja existe");
                 },
                 () -> {
-                    User user = new User();
-                    user.setUsername("ADMIN");
-                    user.setPassword(passwordEncoder.encode("1352"));
-                    user.setRoles(Set.of(roleAdmin));
+                    User user = new User(
+                            "ADMIN",
+                            passwordEncoder.encode("1352"),
+                            Set.of(roleAdmin)
+                    );
                     userRepository.save(user);
                 }
         );

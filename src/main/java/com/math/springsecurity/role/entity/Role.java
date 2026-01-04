@@ -1,13 +1,14 @@
 package com.math.springsecurity.role.entity;
 
 import jakarta.persistence.*;
+import lombok.AccessLevel;
 import lombok.Getter;
-import lombok.Setter;
+import lombok.NoArgsConstructor;
 
 @Entity
 @Table(name = "tb_roles")
 @Getter
-@Setter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Role {
 
     @Id
@@ -15,17 +16,11 @@ public class Role {
     @Column(name = "role_id")
     private Long roleId;
 
+    @Column(nullable = false, unique = true)
     private String name;
 
-    @Getter
     public enum Values{
-        ADMIN(1L),
-        BASIC(2L);
-
-        long roleId;
-
-        Values(long roleId){
-            this.roleId = roleId;
-        }
+        ADMIN,
+        BASIC;
     }
 }
