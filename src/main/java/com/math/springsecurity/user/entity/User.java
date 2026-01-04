@@ -2,7 +2,9 @@ package com.math.springsecurity.user.entity;
 
 import com.math.springsecurity.role.entity.Role;
 import jakarta.persistence.*;
+import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
@@ -12,7 +14,7 @@ import java.util.UUID;
 @Entity
 @Table(name = "tb_users")
 @Getter
-@Setter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class User {
 
     @Id
@@ -20,9 +22,10 @@ public class User {
     @Column(name = "user_id")
     private UUID userId;
 
-    @Column(unique = true)
+    @Column(unique = true, nullable = false)
     private String username;
 
+    @Column(nullable = false)
     private String password;
 
     @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE}, fetch = FetchType.EAGER)
@@ -32,6 +35,12 @@ public class User {
             inverseJoinColumns = @JoinColumn(name = "role_id")
     )
     private Set<Role> roles;
+
+    public User(String username, String encodedPassword, Set<Role> roles){
+        this.username = username;
+        this.password = encodedPassword;
+        this.roles = roles;
+    }
 
     public boolean isLoginCorrect(String rawPassword, PasswordEncoder encoder){
         return encoder.matches(rawPassword, this.password);
