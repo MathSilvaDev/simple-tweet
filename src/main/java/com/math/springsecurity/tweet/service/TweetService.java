@@ -1,7 +1,7 @@
 package com.math.springsecurity.tweet.service;
 
 import com.math.springsecurity.role.entity.Role;
-import com.math.springsecurity.tweet.dto.FeedItemDto;
+import com.math.springsecurity.tweet.dto.response.FeedItem;
 import com.math.springsecurity.tweet.dto.request.CreateTweetRequest;
 import com.math.springsecurity.tweet.dto.response.FeedResponse;
 import com.math.springsecurity.tweet.entity.Tweet;
@@ -12,8 +12,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -32,13 +30,15 @@ public class TweetService {
     }
 
     public FeedResponse feed(int page, int pageSize){
-        Page<FeedItemDto> tweets = tweetRepository.findAll(
+
+        Page<FeedItem> tweets = tweetRepository.findAll(
                     PageRequest.of(page, pageSize, Sort.Direction.DESC, "creationTimestamp")
-                )
-                .map(tweet -> new FeedItemDto(
-                        tweet.getTweetId(),
-                        tweet.getContent(),
-                        tweet.getUser().getUsername())
+                ).map(tweet ->
+                        new FeedItem(
+                                tweet.getTweetId(),
+                                tweet.getContent(),
+                                tweet.getUser().getUsername()
+                        )
                 );
 
         return new FeedResponse(
@@ -50,31 +50,31 @@ public class TweetService {
         );
     }
 
-    public void createTweet(CreateTweetRequest dto, JwtAuthenticationToken token){
-        User user = userRepository.findById(UUID.fromString(token.getName()))
-                .orElseThrow(RuntimeException::new);
+    public void createTweet(CreateTweetRequest request, UUID userId){
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED));
 
-        Tweet tweet = new Tweet();
-        tweet.setContent(dto.content());
-        tweet.setUser(user);
-
+        Tweet tweet = new Tweet(user, request.content());
         tweetRepository.save(tweet);
     }
 
-    public void deleteTweet(Long tweetId, JwtAuthenticationToken token){
-        User user = userRepository.findById(UUID.fromString(token.getName()))
-                .orElseThrow(RuntimeException::new);
+    public void deleteTweet(Long tweetId, UUID userId){
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED));
+
         Tweet tweet = tweetRepository.findById(tweetId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
 
         boolean isAdmin = user.getRoles()
                 .stream()
-                .anyMatch(role -> role.getName().equalsIgnoreCase(Role.Values.ADMIN.name()));
+                .anyMatch(role ->
+                        role.getName().equalsIgnoreCase(Role.Values.ADMIN.name()));
 
-        if (isAdmin || tweet.getUser().getUserId().equals(UUID.fromString(token.getName()))){
-            tweetRepository.deleteById(tweetId);
-        }else {
-           throw new ResponseStatusException(HttpStatus.FORBIDDEN);
+        if (!isAdmin && !tweet.getUser().getUserId().equals(userId)){
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN);
         }
+
+        tweetRepository.deleteById(tweetId);
     }
 }

@@ -1,6 +1,6 @@
-package com.math.springsecurity.tweet.dto;
+package com.math.springsecurity.tweet.dto.response;
 
-public record FeedItemDto(
+public record FeedItem(
         long tweetId,
         String content,
         String username

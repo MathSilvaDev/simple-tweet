@@ -3,11 +3,15 @@ package com.math.springsecurity.tweet.controller;
 import com.math.springsecurity.tweet.dto.request.CreateTweetRequest;
 import com.math.springsecurity.tweet.dto.response.FeedResponse;
 import com.math.springsecurity.tweet.service.TweetService;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.UUID;
+
 @RestController
+@RequestMapping("/tweets")
 public class TweetController {
 
     private final TweetService tweetService;
@@ -16,26 +20,31 @@ public class TweetController {
         this.tweetService = tweetService;
     }
 
-    @GetMapping("/feeds")
-    public ResponseEntity<FeedResponse> feed(@RequestParam(value = "page", defaultValue = "0") int page,
-                                             @RequestParam(value = "pageSize", defaultValue = "10") int pageSize){
+    @GetMapping
+    public ResponseEntity<FeedResponse> feed(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int pageSize){
 
         return ResponseEntity.ok(tweetService.feed(page, pageSize));
     }
 
-    @PostMapping("/tweets")
-    public ResponseEntity<Void> createTweet(@RequestBody CreateTweetRequest dto,
+    @PostMapping
+    public ResponseEntity<Void> createTweet(@RequestBody CreateTweetRequest request,
                                             JwtAuthenticationToken token){
 
-        tweetService.createTweet(dto, token);
-        return ResponseEntity.ok().build();
+        UUID userId = UUID.fromString(token.getName());
+        tweetService.createTweet(request, userId);
+
+        return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
-    @DeleteMapping("/tweets/{id}")
+    @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteTweet(@PathVariable("id") Long tweetId,
                                             JwtAuthenticationToken token){
 
-        tweetService.deleteTweet(tweetId, token);
-        return ResponseEntity.ok().build();
+        UUID userId = UUID.fromString(token.getName());
+        tweetService.deleteTweet(tweetId, userId);
+
+        return ResponseEntity.noContent().build();
     }
 }
