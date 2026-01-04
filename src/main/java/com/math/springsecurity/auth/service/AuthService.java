@@ -13,11 +13,15 @@ import org.springframework.security.oauth2.jwt.JwtEncoderParameters;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
 public class AuthService {
+
+    private static final long TOKEN_EXPIRATION_SECONDS = 300L;
+    private static final String ISSUER = "mybackend";
+    private static final String INVALID_CREDENTIALS_MESSAGE =
+            "user or password is invalid";
 
     private final UserRepository userRepository;
     private final JwtEncoder jwtEncoder;
@@ -33,30 +37,32 @@ public class AuthService {
     }
 
     public LoginResponse login(LoginRequest loginRequest){
-        Optional<User> user = userRepository.findByUsername(loginRequest.username());
+        User user = userRepository.findByUsername(loginRequest.username())
+                .orElseThrow(() -> new BadCredentialsException(INVALID_CREDENTIALS_MESSAGE));
 
-        if(user.isEmpty() || !user.get().isLoginCorrect(loginRequest.password(), passwordEncoder)){
-            throw new BadCredentialsException("user or password is invalid!");
+        if(!user.isLoginCorrect(loginRequest.password(), passwordEncoder)){
+            throw new BadCredentialsException(INVALID_CREDENTIALS_MESSAGE);
         }
 
         Instant now = Instant.now();
-        long expiresIn = 300L;
 
-        String scope = user.get().getRoles()
+        String scope = user.getRoles()
                 .stream()
                 .map(Role::getName)
                 .collect(Collectors.joining(" "));
 
         JwtClaimsSet claims = JwtClaimsSet.builder()
-                .issuer("mybackend")
-                .subject(user.get().getUserId().toString())
+                .issuer(ISSUER)
+                .subject(user.getUserId().toString())
                 .issuedAt(now)
-                .expiresAt(now.plusSeconds(expiresIn))
+                .expiresAt(now.plusSeconds(TOKEN_EXPIRATION_SECONDS))
                 .claim("scope", scope)
                 .build();
 
-        String jwtValue = jwtEncoder.encode(JwtEncoderParameters.from(claims)).getTokenValue();
+        String jwtValue = jwtEncoder
+                .encode(JwtEncoderParameters.from(claims))
+                .getTokenValue();
 
-        return new LoginResponse(jwtValue, expiresIn);
+        return new LoginResponse(jwtValue, TOKEN_EXPIRATION_SECONDS);
     }
 }
