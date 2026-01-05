@@ -3,6 +3,7 @@ package com.math.springsecurity.user.controller;
 import com.math.springsecurity.user.dto.request.CreateUserRequest;
 import com.math.springsecurity.user.dto.response.UserResponse;
 import com.math.springsecurity.user.service.UserService;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -21,7 +22,7 @@ public class UserController {
     }
 
     @PostMapping
-    public ResponseEntity<Void> createUser(@RequestBody CreateUserRequest request){
+    public ResponseEntity<Void> createUser(@Valid @RequestBody CreateUserRequest request){
         userService.createUser(request);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }

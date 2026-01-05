@@ -21,7 +21,7 @@ public class Tweet {
     private Long tweetId;
 
     @ManyToOne(optional = false)
-    @JoinColumn(name = "user_id")
+    @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
     @Column(nullable = false, length = 200)

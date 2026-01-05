@@ -3,6 +3,7 @@ package com.math.springsecurity.tweet.controller;
 import com.math.springsecurity.tweet.dto.request.CreateTweetRequest;
 import com.math.springsecurity.tweet.dto.response.FeedResponse;
 import com.math.springsecurity.tweet.service.TweetService;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
@@ -29,7 +30,7 @@ public class TweetController {
     }
 
     @PostMapping
-    public ResponseEntity<Void> createTweet(@RequestBody CreateTweetRequest request,
+    public ResponseEntity<Void> createTweet(@Valid @RequestBody CreateTweetRequest request,
                                             JwtAuthenticationToken token){
 
         UUID userId = UUID.fromString(token.getName());
