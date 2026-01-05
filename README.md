@@ -5,7 +5,9 @@ It uses JWT for authentication and supports role-based access (ADMIN/BASIC).
 You can create tweets, check a paginated feed, and manage users in a secure way.  
 The backend is organized and easy to follow, with a focus on clean code and practical security.
 
-[simple-tweet.onrender.com](https://simple-tweet.onrender.com/swagger-ui/index.html/)
+
+⚠️**Note**: Since the app is hosted on Render's free plan, it may take a few minutes to start.
+[simple-tweet.onrender.com](https://simple-tweet.onrender.com/swagger-ui/index.html#/)
 
 ---
 
