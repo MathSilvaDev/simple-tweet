@@ -4,6 +4,9 @@ This is a simple REST API built with Spring Boot.
 It uses JWT for authentication and supports role-based access (ADMIN/BASIC).  
 You can create tweets, check a paginated feed, and manage users in a secure way.  
 The backend is organized and easy to follow, with a focus on clean code and practical security.
+
+[example:](https://simple-tweet.onrender.com)
+
 ---
 
 ## Spring Security JWT API
