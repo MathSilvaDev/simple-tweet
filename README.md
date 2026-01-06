@@ -7,6 +7,10 @@ The backend is organized and easy to follow, with a focus on clean code and prac
 
 
 ⚠️**Note**: Since the app is hosted on Render's free plan, it may take a few minutes to start.
+
+username: ADMIN
+password: 1352
+
 [simple-tweet.onrender.com](https://simple-tweet.onrender.com/swagger-ui/index.html#/)
 
 ---
